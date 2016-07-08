@@ -1,0 +1,12 @@
+/**
+ * UI Leaflet Integration CSS
+ * Just some base styles
+ */
+
+.ui-leaflet-map {
+	display: block;
+	width: 100%;
+}
+.ui-leaflet-div-icon {
+	color: #d22;
+}
