@@ -27,6 +27,7 @@ Currently implemented features:
 * Quick address lookup 
 * Shortcode insertion via a nice user interface in the editor
 * A settings page (there are already options in place, just no interface to change em)
+* Properly implemented shortcode asset loading via a separate class / plugin
 
 = Website =
 
