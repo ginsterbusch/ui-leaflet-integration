@@ -39,7 +39,6 @@ class _ui_LeafletIntegration {
 		 * @hook ui_leaflet_load_leaflet_version
 		 */
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '0.7.7' );
-		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0-rc1' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0.1' );
 		
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
@@ -70,9 +69,9 @@ class _ui_LeafletIntegration {
 		wp_register_style( $this->pluginPrefix .'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
 		
 		// dont load CSS in footer
-		if( !is_admin() ) {
-			$this->load_assets('css');
-		}
+		
+		$this->load_assets('css');
+		
 		
 	}
 	
