@@ -70,7 +70,9 @@ class _ui_LeafletIntegration {
 		wp_register_style( $this->pluginPrefix .'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
 		
 		// dont load CSS in footer
-		$this->load_assets('css');
+		if( !is_admin() ) {
+			$this->load_assets('css');
+		}
 		
 	}
 	
@@ -96,7 +98,7 @@ class _ui_LeafletIntegration {
 		global $_ui_is_enqueued;
 		
 		
-		if( !empty( $handle ) && !empty( $type ) ) {
+		if( !empty( $handle ) && !empty( $type ) && !is_admin() ) {
 		/*	new __debug( array(
 				'handle' => $handle,
 				'type' => $type,
@@ -147,6 +149,9 @@ class _ui_LeafletIntegration {
 	}
 	
 	function load_assets( $type = 'all' ) {
+		if( is_admin() ) { // avoid loading in the backend
+			return;
+		}
 		
 		if( empty( $type ) ) {
 			$type = 'all';
