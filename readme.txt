@@ -2,11 +2,12 @@
 Contributors: usability.idealist
 Tags: map, maps, Leaflet, shortcode, OpenStreetMap, OSM, opendata, open data, location, geo, geocoding, geolocation, mapnik, mapquest, mapbox, OpenLayers, mapping, coordinates, geocoding, geotagging, latitude, longitude, position, google maps, googlemaps, gmaps, google map, wms, tms, marker, layer, karte, custom marker text, leaflet map, map shortcode
 Requires at least: 4.1
-Tested up to: 4.6
+Tested up to: 4.7
+Stable tag: trunk
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The most less excessive Leaflet map integration. Keeping it simple with a shortcode. Uses the latest Leaflet libary (1.0-rc1).
+The most less excessive Leaflet map integration. Keeping it simple with a shortcode. Uses the latest Leaflet libary (1.0.1).
 
 == Description ==
 
@@ -118,6 +119,10 @@ http://github.com/ginsterbusch/ui-leaflet-integration/issues
 2. End result
 
 == Changelog ==
+
+= 0.3 =
+
+* Updated Leaflet.js to the latest stable version (1.0.1).
 
 = 0.2 =
 

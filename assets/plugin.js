@@ -15,7 +15,7 @@ jQuery( function() {
 			var strMapID = jQuery( this ).attr('id');
 			var config = jQuery( this ).data('leaflet-config');
 			
-			console.log( 'config:', config, ' mapID: ', strMapID );
+			//console.log( 'config:', config, ' mapID: ', strMapID );
 			
 			if( typeof( strMapID ) != 'undefined' && strMapID != '' && typeof( config ) == 'object' ) {
 				
@@ -69,7 +69,7 @@ jQuery( function() {
 						
 						
 						
-						console.log( 'title:', strMarkerTitle, 'text:', strMarkerText );
+						//console.log( 'title:', strMarkerTitle, 'text:', strMarkerText );
 						
 						
 						

@@ -2,13 +2,15 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.2
+ * @version 0.3
  */
  
 class _ui_LeafletIntegration {
-	var $pluginPrefix = 'ui_leaflet_',
+	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
-		$pluginURL = '';
+		$pluginURL = '',
+		$pluginVersion = '0.3';
+		
 	
 	public static function init() {
 		new self();
@@ -38,6 +40,7 @@ class _ui_LeafletIntegration {
 		 */
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '0.7.7' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0-rc1' );
+		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0.1' );
 		
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
 		$leaflet_css_url = apply_filters( $this->pluginPrefix . 'css_url', trailingslashit( $this->pluginURL ) . "assets/leaflet/$leaflet_version/leaflet.css");
@@ -55,7 +58,7 @@ class _ui_LeafletIntegration {
 		
 		
 		wp_register_script( $this->pluginPrefix .'js', $leaflet_js_url, null, $leaflet_version, $load_in_footer );	
-		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'js' ), '0.1', $load_in_footer );
+		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'js' ),  $this->pluginVersion, $load_in_footer );
 		
 		/**
 		 * NOTE: DO _NOT_ attempt to load the CSS in the footer - it will fuck up the map display!
@@ -64,7 +67,7 @@ class _ui_LeafletIntegration {
 		
 		
 		wp_register_style( $this->pluginPrefix .'css', $leaflet_css_url, null, $leaflet_version );
-		wp_register_style( $this->pluginPrefix .'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), '0.1', false );
+		wp_register_style( $this->pluginPrefix .'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
 		
 		// dont load CSS in footer
 		$this->load_assets('css');
