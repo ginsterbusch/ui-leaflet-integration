@@ -18,7 +18,8 @@ jQuery( function() {
 			//console.log( 'config:', config, ' mapID: ', strMapID );
 			
 			if( typeof( strMapID ) != 'undefined' && strMapID != '' && typeof( config ) == 'object' ) {
-				
+				// fire custom init event
+				jQuery( document ).trigger( '_ui_leaflet_map_init' );
 				
 				
 				
@@ -31,7 +32,9 @@ jQuery( function() {
 				
 				if( typeof(config.latitude ) != 'undefined' && typeof( config.longitude ) != 'undefined' ) {
 					var map_zoomlevel = ( typeof( config.zoom ) != 'undefined' ? config.zoom : 16 );
-					console.log( 'zoomlevel:', map_zoomlevel ); 
+					
+					//console.log( 'zoomlevel:', map_zoomlevel ); 
+					
 					var	map_layer = ( typeof( config.layer ) != 'undefined' ? config.layer : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' );
 					
 					// init map
@@ -93,12 +96,15 @@ jQuery( function() {
 	
 						L.marker( posMarker, {icon: L.divIcon({className: 'ui-leaflet-div-icon', html: strMarkerIcon} ) } ).addTo( _ui_leaflet_maps[strMapID] ).bindPopup( strMarkerText ).openPopup();
 						
+						jQuery( document ).trigger( '_ui_leaflet_map_marker_added' );
+						
 						// .. and remove marker code from dom, to avoid issues
 						jQuery('#' + strMapID + ' script.ui-leaflet-marker' ).remove();
 						
 					}
 				}
 				
+				jQuery( document ).trigger( '_ui_leaflet_map_loaded' );
 			}
 		})
 	}
