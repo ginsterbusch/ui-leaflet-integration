@@ -19,7 +19,9 @@ jQuery( function() {
 			
 			if( typeof( strMapID ) != 'undefined' && strMapID != '' && typeof( config ) == 'object' ) {
 				// fire custom init event
-				jQuery( document ).trigger( '_ui_leaflet_map_init' );
+				jQuery( document ).trigger( '_ui_leaflet_map_init' ); // base event
+				
+				jQuery( document ).trigger( '_ui_leaflet_map_init__' + strMapID ); // custom map id
 				
 				
 				
@@ -103,8 +105,9 @@ jQuery( function() {
 						
 					}
 				}
+				jQuery( document ).trigger( '_ui_leaflet_map_loaded' ); // base event
 				
-				jQuery( document ).trigger( '_ui_leaflet_map_loaded' );
+				jQuery( document ).trigger( '_ui_leaflet_map_loaded__' + strMapID );
 			}
 		})
 	}
