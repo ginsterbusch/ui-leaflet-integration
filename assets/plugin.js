@@ -1,5 +1,13 @@
 /**
  * Leaflet handler (theoretically requires no jQuery, but we use it anyway, just because ;) :P )
+ * 
+ * @version 0.4
+ * Changelog:
+ * v0.5:
+ * - enhanced custom events with useful information
+ * - event data always include the map ID
+ * v0.4:
+ * - added custom events
  */
 
 jQuery( function() {
@@ -10,7 +18,7 @@ jQuery( function() {
 	// grab all maps
 	
 	if( jQuery('.ui-leaflet-map').length > 0 ) {
-		jQuery('.ui-leaflet-map').each( function()  { // i, elem
+		jQuery('.ui-leaflet-map').each( function( iMapCount, elem)  { // i, elem
 			// init map(s)
 			var strMapID = jQuery( this ).attr('id');
 			var config = jQuery( this ).data('leaflet-config');
@@ -19,10 +27,12 @@ jQuery( function() {
 			
 			if( typeof( strMapID ) != 'undefined' && strMapID != '' && typeof( config ) == 'object' ) {
 				// fire custom init event
-				jQuery( document ).trigger( '_ui_leaflet_map_init' ); // base event
-				
-				jQuery( document ).trigger( '_ui_leaflet_map_init__' + strMapID ); // custom map id
-				
+				jQuery( document ).trigger( '_ui_leaflet_map_init', {
+					'map_id': strMapID,
+					'config': config,
+					'map_count': iMapCount,
+				} ); //
+
 				
 				
 				// init map
@@ -98,16 +108,30 @@ jQuery( function() {
 	
 						L.marker( posMarker, {icon: L.divIcon({className: 'ui-leaflet-div-icon', html: strMarkerIcon} ) } ).addTo( _ui_leaflet_maps[strMapID] ).bindPopup( strMarkerText ).openPopup();
 						
-						jQuery( document ).trigger( '_ui_leaflet_map_marker_added' );
+						jQuery( document ).trigger( '_ui_leaflet_map_marker_added', { 
+							'map_id': strMapID,
+							'marker': {
+								'position': posMarker,
+								'icon_class': 'ui-leaflet-div-icon'
+							},
+						} );
 						
 						// .. and remove marker code from dom, to avoid issues
 						jQuery('#' + strMapID + ' script.ui-leaflet-marker' ).remove();
 						
 					}
 				}
-				jQuery( document ).trigger( '_ui_leaflet_map_loaded' ); // base event
+				jQuery( document ).trigger( '_ui_leaflet_map_loaded', {
+					'map_id': strMapID,
+					'settings': {
+						'layer': map_layer,
+						'zoom_level': map_zoomlevel,
+						'longitude': config.longitude, 
+						'latitude': config.latitude,
+					}
+				} ); // base event
 				
-				jQuery( document ).trigger( '_ui_leaflet_map_loaded__' + strMapID );
+				
 			}
 		})
 	}
