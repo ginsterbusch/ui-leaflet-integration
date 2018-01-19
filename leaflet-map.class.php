@@ -2,14 +2,14 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.3
+ * @version 0.5
  */
  
 class _ui_LeafletIntegration {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.3';
+		$pluginVersion = '0.5';
 		
 	
 	public static function init() {
@@ -41,6 +41,7 @@ class _ui_LeafletIntegration {
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '0.7.7' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0.1' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.2' );
+		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.3' );
 		
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
 		$leaflet_css_url = apply_filters( $this->pluginPrefix . 'css_url', trailingslashit( $this->pluginURL ) . "assets/leaflet/$leaflet_version/leaflet.css");
@@ -76,78 +77,6 @@ class _ui_LeafletIntegration {
 		
 	}
 	
-	/**
-	 * Wrapper / Alias for @method enqueue
-	 */
-	
-	function enqueue_script( $handle = '' ) {
-		$this->enqueue( 'script', $handle );
-	}
-	
-	function enqueue_css( $handle = '' ) {
-		$this->enqueue( 'style', $handle );	
-	}
-	
-	function enqueue_style( $handle = '' ) {
-		$this->enqueue( 'style', $handle );	
-	}
-	
-	
-	
-	function enqueue( $type = 'script', $handle = '' ) {
-		global $_ui_is_enqueued;
-		
-		
-		if( !empty( $handle ) && !empty( $type ) && !is_admin() ) {
-		/*	new __debug( array(
-				'handle' => $handle,
-				'type' => $type,
-			), __METHOD__ );
-		*/
-			if( empty( $_ui_is_enqueued[ $type ][ $handle ] ) ) { // empty is better, because FALSE := empty, too!
-				$_ui_is_enqueued[ $type ][ $handle ] = true;
-				
-				
-				switch( $type ) {
-					case 'style':
-					case 'css':
-					
-						wp_enqueue_style( $handle );
-						break;
-					case 'script':
-					case 'js':
-						wp_enqueue_script( $handle );
-						break;
-				}
-			}
-		}
-		
-	}
-	
-	/**
-	 * wp_style_is / wp_script_is works unreliable in the content / below wp_head
-	 */
-	
-	function is_enqueued( $type = 'script', $handle = '' ) {
-		global $_ui_is_enqueued;
-		$return = false;
-		
-		if( !empty( $handle ) && !empty( $_ui_is_enqueued[ $type ][ $handle ] ) ) {
-			
-			$return = true;
-		}
-		
-		//new __debug( array( 'return code' => ( $return ? 'true' : 'false' ) ), __METHOD__ );
-		
-		return $return;
-	}
-	
-	function reset_queue() {
-		global $_ui_is_enqueued;
-		
-		$_ui_is_enqueued = array(); // soft reset
-	}
-	
 	function load_assets( $type = 'all' ) {
 		if( is_admin() ) { // avoid loading in the backend
 			return;
@@ -166,8 +95,8 @@ class _ui_LeafletIntegration {
 			
 			//if( $this->is_enqueued( 'script', $this->pluginPrefix . 'plugin' ) == false ) {
 			if( !wp_script_is( $this->pluginPrefix . 'js', 'enqueued' ) ) {
-				$this->enqueue_script( $this->pluginPrefix . 'plugin' );
-				//wp_enqueue_script( $this->pluginPrefix .'plugin' );
+				//$this->enqueue_script( $this->pluginPrefix . 'plugin' );
+				wp_enqueue_script( $this->pluginPrefix .'plugin' );
 			}
 		}
 		
@@ -177,8 +106,8 @@ class _ui_LeafletIntegration {
 			if( !wp_style_is( $this->pluginPrefix . 'css', 'enqueued' ) ) {
 			//if( $this->is_enqueued( 'style', $this->pluginPrefix . 'plugin' ) == false ) {
 			
-				//wp_enqueue_style( $this->pluginPrefix .'css' );
-				$this->enqueue_style( $this->pluginPrefix . 'plugin' );
+				wp_enqueue_style( $this->pluginPrefix .'css' );
+				//$this->enqueue_style( $this->pluginPrefix . 'plugin' );
 			}
 		}
 	}
@@ -246,6 +175,9 @@ class _ui_LeafletIntegration {
 			'map' => '', /* aliases */
 				'map_id' => '',
 				'mapid' => '',
+			'routing' => '', /* aliases */
+				'add_routing' => '',
+				'routing_link' => '',
 		), $attr ), EXTR_SKIP );
 		
 		
@@ -310,6 +242,7 @@ class _ui_LeafletIntegration {
 	 * @param string $long|longitude	Longitude. Required.
 	 * @param string $position			Format: "$longitude, $latitude". Alternative to using the longitude and latitude parameters.
 	 * @param int $zoom					Zoom level. Optional.
+	 * @param string $routing			Possible routing apps: google (Google Maps)
 	 * 
 	 * 48.1372568,11.5759285 <= fischbrunnen = base coordinates
 	 * lat=48.13733&lon=11.57599 (acc. to OSM) => http://openstreetmap.de/karte.html?zoom=18&lat=48.13733&lon=11.57599&layers=000BTT
@@ -329,6 +262,8 @@ class _ui_LeafletIntegration {
 			'position' => '48.1372568, 11.5759285',
 			'zoom' => 16,
 			'marker' => '', /*'48.1372568, 11.5759285' => position; use $content as text: h1 - h6 = title, rest = text */
+			'routing' => '',
+			'route_service' => '',
 			'layer' => 'default',
 			'layer_api_key' => '',
 			'class' => 'ui-leaflet-map',
@@ -437,6 +372,59 @@ class _ui_LeafletIntegration {
 					strip_tags( $content, '<h1><h2><h3><h4><h5><h6><a><strong><em><b><i><del><s><p><br><ul><ol><li><dl><dt><dd>' ) 
 				) );
 				
+				/**
+				 * Optionally append routing link
+				 * 
+				 * - google: http://maps.google.com/maps?saddr=Seestr.+11+13349+Berlin&daddr=Seestr.+38+13349+Berlin
+				 * - ors / openroute / openrouteservice: https://www.openrouteservice.org/directions?n1=48.133088&n2=11.562892&n3=15&a=48.137236,11.576181,48.131265,11.54922&b=0&c=0&k1=en-US&k2=km
+				 * => https://www.openrouteservice.org/directions?n1=48.137257&n2=11.575929&n3=15&a=48.137257,11.575929,null,null&b=0&c=0&k1=en-US&k2=km
+				 * - graphhopper / gh: https://graphhopper.com/maps/?point=Theresienwiese%2C%2080336%2C%20M%C3%BCnchen%2C%20Deutschland&point=Fischbrunnen%2C%2080331%2C%20M%C3%BCnchen%2C%20Deutschland&locale=de-DE&vehicle=car&weighting=fastest&elevation=true&use_miles=false&layer=Omniscale
+				 * 
+				 * https://graphhopper.com/maps/?point=48.1372568,11.5759285&use_miles=false&vehicle=car
+				 *
+				 * TODO: Turn this into something dynamic, preferable with a filter (array)
+				 */
+			
+				if( !empty( $routing ) || !empty( $route_service)  ) {
+					$strRoutingService = ( !empty( $routing ) ? $routing : $route_service );
+					
+					
+					switch( $strRoutingService ) {
+						case 'google':
+						case 'true':
+						case 'yes':
+							$strRoutingURL = 'http://maps.google.com/maps?saddr=' . $marker_latitude . ',' . $marker_longitude; // lat, long
+							$strRoutingTitle = 'Google Maps';
+							break;
+						case 'ors':
+						case 'orsm':
+						case 'openroute':
+						case 'openrouteservice':
+							// https://www.openrouteservice.org/directions?n1=48.1372568&n2=11.5759285&n3=15&a=48.1372568,11.5759285&b=0&c=0 <= 48.1372568, 11.5759285'
+							$strRoutingURL = 'https://www.openrouteservice.org/directions?n1=' . $marker_latitude . '&n2='. $marker_longitude .'&n3=' . ( !empty( $zoom ) ? $zoom : 15 ) . '&a='. $marker_latitude . ',' . $marker_longitude .',null,null&b=0&c=0&k1=en-US&k2=km';
+							$strRoutingTitle = 'Open Route Service';
+							
+							
+							break;
+						case 'gh':
+						case 'graph':
+						case 'graphhopper':
+						case 'graphhoper':
+							break;
+					}
+					
+					$strRoutingText = sprintf( __('Open in %s', '_ui-leaflet-integration'), $strRoutingTitle );
+					if( !empty( $routing_text ) || !empty( $route_service_text ) ) {
+						$strRoutingText = ( !empty( $routing_text ) ? $routing_text : $route_service_text );
+					}
+					
+					if( !empty( $strRoutingURL ) ) {
+						$strCleanContent .= '<p class="ui-leaflet-routing-service"><a href="' . esc_url( $strRoutingURL ) . '">' . $strRoutingText . '</a></p>';
+					}
+				}
+				
+				
+			
 			
 				$strMarkerID = sprintf( $marker_id, $map_count . '-1' );
 				$strMarker = sprintf( '<script class="%s" id="%s" type="text/html">%s</script>', $marker_class, $strMarkerID, $strCleanContent );
@@ -459,6 +447,45 @@ class _ui_LeafletIntegration {
 			$this->load_assets();
 		}
 	
+		
+		return $return;
+	}
+	
+	/**
+	 * NOTE: Preparation for 0.5+
+	 */
+	
+	function get_routing_services() {
+		$return = false;
+		
+		$arrKnownServices = array(
+			'Google Maps' => array(
+				'keywords' => array( 
+					'google', 'yes', 'true' 
+				),
+				'url' => 'http://maps.google.com/maps?saddr=%marker_latitude%,%marker_longitude%',
+				'max_zoom' => 15, /* defaults to 16 = OSM */
+			),
+			
+			'Open Route Service' => array(
+				'keywords' => array(
+					'ors',
+					'orsm',
+					'openroute',
+					'openrouteservice',
+				),
+				'url' => 'https://www.openrouteservice.org/directions?n1=%marker_latitude%&n2=%marker_longitude%&n3=%zoom%&a=%marker_latitude%,%marker_longitude%,null,null&b=0&c=0&k1=en-US&k2=km',
+			),
+						
+			'GraphHopper' => array(
+				'keywords' => array(
+					'gh', 'graphhopper', 'graphopper', 'graphhoper',
+				),
+				'url' => '',
+			),
+		);
+		
+		$return = apply_filters( $this->pluginPrefix . 'get_routing_services', $arrKnownServices );
 		
 		return $return;
 	}

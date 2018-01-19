@@ -121,6 +121,12 @@ http://github.com/ginsterbusch/ui-leaflet-integration/issues
 
 == Changelog ==
 
+= 0.4 =
+
+* Updated leaflet.js to the latest stable version (1.2)
+* Removed the on-demand asset loading (which is going to resurface in a separate library in the near future)
+* Added option for linking to several pre-defined route services (Google Maps, OSRM and GraphHopper so far)
+
 = 0.3 =
 
 * Updated Leaflet.js to the latest stable version (1.0.1).
