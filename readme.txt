@@ -2,7 +2,7 @@
 Contributors: usability.idealist
 Tags: map, maps, Leaflet, shortcode, OpenStreetMap, OSM, opendata, open data, location, geo, geocoding, geolocation, mapnik, mapquest, mapbox, OpenLayers, mapping, coordinates, geocoding, geotagging, latitude, longitude, position, google maps, googlemaps, gmaps, google map, wms, tms, marker, layer, karte, custom marker text, leaflet map, map shortcode
 Requires at least: 4.1
-Tested up to: 4.7
+Tested up to: 5.0-nightly
 Stable tag: trunk
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -19,14 +19,20 @@ Currently implemented features:
 * Create a marker by simply adding content inside the map shortcode
 * Optionally position the marker somewhere else on that map
 * A few helpful filter hooks
-* On-demand loading of the respective JS files
+* On-demand loading of the respective JS files (more or less)
+* Always the latest version of Leaflet.js, with switching option to older versions (filter hook `ui_leaflet_load_leaflet_version`; available versions: 0.7.7, 1.0.1, 1.2, 1.3) 
+
+= Work in progress =
+
+* Quick address lookup with history (last 50 entries)
+* Admin screen for settings + before-mentioned address lookup
+* Drop-in default config file (for the WP uploads directory, normally located in `wp-content/uploads`
+* Filter hook documentation
 
 = Future plans = 
 
 * Multiple markers (shortcode)
-* Quick address lookup 
 * Shortcode insertion via a nice user interface in the editor
-* A settings page (there are already options in place, just no interface to change em)
 * Properly implemented shortcode asset loading via a separate class / plugin
 
 = Website =
@@ -108,6 +114,35 @@ The currently easiest method is:
 A. If no position is set, the map latitude and longitude defaults to "48.1372568, 11.5759285", which is located on the Marienplatz in Munich.
 Actually, it's nearly identical to the position shown in the example :D
 
+= Q. Loading a different Leaflet.js version =
+
+There are several (programmatical) options available. First would be to load just a different local version:
+
+* Use the `ui_leaflet_load_leaflet_version` filter hook to switch between the different versions supplied in the `assets` directory - just add the version as a **string**, eg. '0.7.7' for the old stable release.
+* Available versions: 0.7.7, 1.0.1, 1.2, 1.3
+
+Second choice: Loading external libraries, as suggested by the Leaflet.js download page.
+
+* Use the filter hook `ui_leaflet_js_url' for the JavaScript file ..
+* .. and the filter hook `ui_leaflet_css_url` for the CSS file 
+
+** Example**
+
+```<?php
+function my_custom_leaflet_js() {
+return 'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js';
+}
+
+add_filter( 'ui_leaflet_js_url', 'my_custom_leaflet_js' );
+
+function my_custom_leaflet_css() {
+return 'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css';
+}
+
+add_filter( 'ui_leaflet_css_url', 'my_custom_leaflet_css' );
+?>``` 
+
+
 = Q. I have a question =
 A. Chances are, someone else has asked it. Either check out the support forum at WP or take a look at the official issue tracker:
 http://github.com/ginsterbusch/ui-leaflet-integration/issues
@@ -120,6 +155,15 @@ http://github.com/ginsterbusch/ui-leaflet-integration/issues
 2. End result
 
 == Changelog ==
+
+= 0.5.1 =
+
+* Forgot to update this very bloody Readme file ... *ehem*
+
+= 0.5 =
+
+* Updated leaflet.js to the latest stable version (1.3)
+* Minor changes or updates in the plugin code
 
 = 0.4 =
 
