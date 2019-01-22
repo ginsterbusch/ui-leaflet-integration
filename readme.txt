@@ -156,6 +156,10 @@ http://github.com/ginsterbusch/ui-leaflet-integration/issues
 
 == Changelog ==
 
+= 0.6 =
+
+* Updated leaflet.js to the latest stable version (1.3.3)
+
 = 0.5.1 =
 
 * Forgot to update this very bloody Readme file ... *ehem*
