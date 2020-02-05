@@ -1,8 +1,11 @@
 /**
  * Leaflet handler (theoretically requires no jQuery, but we use it anyway, just because ;) :P )
  * 
- * @version 0.4
+ * @version 0.5
  * Changelog:
+ * v0.6:
+ * - integration of geocoder / geosearch
+ * 
  * v0.5:
  * - enhanced custom events with useful information
  * - event data always include the map ID
@@ -66,6 +69,24 @@ jQuery( function() {
 					// focus
 					//var mymap = L.map('mapid').setView([51.505, -0.09], 13);
 					//_ui_leaflet_maps[ strMapID ].setView( [51.505, -0.09], 14 );
+					
+					// add geopos search if enabled
+					console.log( 'current config:', config );
+					
+					if( typeof( config.use_search ) != 'undefined' && typeof( L.Control.geocoder ) != 'undefined' ) { // enabled and geocoder lib loaded
+						
+						_search_position = 'topleft';
+						
+						if( typeof( config.search_position ) != 'undefined' ) {
+							_search_position = _search_position;
+						}
+						
+						L.Control.geocoder({
+							collapsed: false,
+							position: _search_position,
+						}).addTo( _ui_leaflet_maps[ strMapID ] );
+					}
+					
 					_ui_leaflet_maps[ strMapID ].setView( {lng: config.longitude, lat: config.latitude}, map_zoomlevel );
 					
 					
@@ -89,6 +110,7 @@ jQuery( function() {
 						
 						
 						var posMarker = { 'lng': config.longitude, 'lat': config.latitude };
+						
 						// custom position
 						if( typeof( config.marker_position ) != 'undefined' && config.marker_position.latitude != config.latitude && config.marker_position.longitude != config.longitude ) {
 							posMarker.lng = config.marker_position.longitude;

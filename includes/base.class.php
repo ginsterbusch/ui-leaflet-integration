@@ -44,7 +44,12 @@ class _ui_LeafletBase {
 	public static function get_post_id( $default = 0, $in_loop = false ) {
 		$helper = new self();
 		
-		if( empty( $in_loop ) ) {
+		/**
+		 * @link https://codex.wordpress.org/Function_Reference/is_main_query
+		 */
+		
+		
+		if( empty( $in_loop ) && !is_main_query() ) {
 			return $helper->_get_post_id( $default );
 		} else {
 			return $helper->get_post_object_id( $default );

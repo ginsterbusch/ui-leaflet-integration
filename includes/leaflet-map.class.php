@@ -2,14 +2,14 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.7
+ * @version 0.8
  */
  
 class _ui_LeafletIntegration extends _ui_LeafletBase {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.7';
+		$pluginVersion = '0.8';
 		
 	
 	public static function init() {
@@ -20,11 +20,13 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		$this->_setup();
 		
 		add_shortcode( 'ui_leaflet_map', array( $this, 'shortcode_map' ) );
+		
 		if( !empty( $this->config['enable_map_shortcode'] ) ) {
 			add_shortcode('map', array( $this, 'shortcode_map' ) );
 		}
 		
 		add_shortcode( 'ui_leaflet_marker', array( $this, 'shortcode_marker' ) );
+		
 		if( !empty( $this->config['enable_marker_shortcode'] ) ) {
 			add_shortcode('marker', array( $this, 'shortcode_map' ) );
 		}
@@ -110,8 +112,8 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		if( !empty( $arrDetectedShortcode ) ) { // load assets
 		
-			add_action( 'wp_enqueue_scripts', array( $this, 'init_assets' ) );
-			add_action( 'wp_enqueue_scripts', array( $this, 'load_assets' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'init_assets' ), 9 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'load_assets' ), 15 );
 		}
 	}
 	
@@ -125,16 +127,31 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.2' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.3' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.3.3' );
+		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.6' );
 		
 		
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
 		$leaflet_css_url = apply_filters( $this->pluginPrefix . 'css_url', trailingslashit( $this->pluginURL ) . "assets/leaflet/$leaflet_version/leaflet.css");
 		
+		//$leaflet_geocoder_version = '1.10.0';
+		//$leaflet_geocoder_js_url = apply_filters( $this->pluginPrefix . 'geocoder_js_url', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.js' );
+		//$leaflet_geocoder_css_url = apply_filters( $this->pluginPrefix . 'geocoder_css_url', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css' );
+		
+		
 		
 		$load_in_footer = apply_filters( $this->pluginPrefix . 'load_in_footer', true );
 		
 		wp_register_script( $this->pluginPrefix .'js', $leaflet_js_url, null, $leaflet_version, $load_in_footer );	
-		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'js' ),  $this->pluginVersion, $load_in_footer );
+		
+		wp_register_script( $this->pluginPrefix . 'geocoder_js', $this->pluginURL . 'assets/extensions/Control.Geocoder.min.js', array( $this->pluginPrefix . 'js' ), '1.10.0', $load_in_footer );
+		
+		
+		
+		//wp_register_script( $this->pluginPrefix . 'plugin_simple', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'js' ), $this->pluginVersion, $load_in_footer );
+		
+		// full
+		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'geocoder_js' ), $this->pluginVersion, $load_in_footer );
+		
 		
 		/**
 		 * NOTE: DO _NOT_ attempt to load the CSS in the footer - it will fuck up the map display!
@@ -142,8 +159,13 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		 */
 		
 		
-		wp_register_style( $this->pluginPrefix .'css', $leaflet_css_url, null, $leaflet_version );
-		wp_register_style( $this->pluginPrefix .'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
+		wp_register_style( $this->pluginPrefix . 'css_simple', $leaflet_css_url );
+		
+		wp_register_style( $this->pluginPrefix . 'css', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css', array( $this->pluginPrefix . 'css_simple' ) );
+		
+		//wp_register_style( $this->pluginPrefix . 'plugin_simple', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
+		
+		//wp_register_style( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'geocoder_css' ), $this->pluginVersion, false );
 		
 		// dont load CSS in footer
 		
@@ -152,7 +174,12 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 	}
 	
-	function load_assets( $type = 'all' ) {
+	function load_assets( $deprecated = '' ) {
+		wp_enqueue_style( $this->pluginPrefix . 'css' );
+		wp_enqueue_script( $this->pluginPrefix . 'plugin' );		
+	}
+	
+	function _load_assets( $type = 'all' ) {
 		if( is_admin() ) { // avoid loading in the backend
 			return;
 		}
@@ -169,21 +196,21 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			}*/
 			
 			//if( $this->is_enqueued( 'script', $this->pluginPrefix . 'plugin' ) == false ) {
-			if( !wp_script_is( $this->pluginPrefix . 'js', 'enqueued' ) ) {
+			//if( !wp_script_is( $this->pluginPrefix . 'js', 'enqueued' ) ) {
 				//$this->enqueue_script( $this->pluginPrefix . 'plugin' );
-				wp_enqueue_script( $this->pluginPrefix .'plugin' );
-			}
+				wp_enqueue_script( $this->pluginPrefix . 'plugin' );
+			//}
 		}
 		
 		if( $type == 'all' || $type == 'css' || $type == 'style' ) {
 			
 			// avoid double enqueuing
-			if( !wp_style_is( $this->pluginPrefix . 'css', 'enqueued' ) ) {
+			//if( !wp_style_is( $this->pluginPrefix . 'css', 'enqueued' ) ) {
 			//if( $this->is_enqueued( 'style', $this->pluginPrefix . 'plugin' ) == false ) {
 			
-				wp_enqueue_style( $this->pluginPrefix .'css' );
+				wp_enqueue_style( $this->pluginPrefix . 'css' );
 				//$this->enqueue_style( $this->pluginPrefix . 'plugin' );
-			}
+			//}
 		}
 	}
 	
@@ -215,7 +242,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			$this->pluginPath = _UI_LEAFLET_MAP_PATH;
 		}
 		
-		add_action('wp_footer', array( $this, 'reset_queue' ), 9999 );
+		//add_action('wp_footer', array( $this, 'reset_queue' ), 9999 );
 		
 	}
 	
@@ -232,7 +259,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			'enable_map_shortcode' => false,
 			'enable_marker_shortcode' => false,
 			'tile_server' => 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-			'map_height' => '300px', /* default height */
+			'map_height' => '400px', /* default height */
 		);
 	}
 	
@@ -274,6 +301,44 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		if( !empty( $text) || !empty( $content ) || !empty( $map ) ) {
 			
+		}
+		
+		return $return;
+	}
+	
+	function load_tile_server_providers( $path = '' ) {
+		if( !empty( $path ) && file_exists( $path ) ) {
+			$this->config[ 'tile_servers' ] = $this->_load_tile_server_providers( $path );
+			
+		}
+	}
+	
+	function _load_tile_server_providers( $path = '' ) {
+		$return = false;
+		
+		$strExt = pathinfo( strtolower( $path ), PATHINFO_EXTENSION );
+		
+		if( !empty( $path ) && file_exists( $path ) && !empty( $strExt ) && in_array( $strExt, array( 'json', 'js', 'php' ), true ) !== false ) {
+			
+			switch( $strExt ) {
+				case 'php':
+					include( $path );
+					
+					if( !empty( $config ) ) {
+						$return = $config;
+					}
+					
+					break;
+				case 'json':
+				case 'js':
+					$data = file_get_contents( $path );
+					
+					if( $this->is_json( $data ) ) {
+						$return = json_decode( $data );
+					}
+					
+					break;
+			}
 		}
 		
 		return $return;
@@ -361,6 +426,9 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			'id' => 'ui-leaflet-map-id-%s',
 			'marker_id' => 'ui-leaflet-marker-%s',
 			'height' => $this->config['map_height'],
+			'use_search' => '',
+			'search_provider' => '', // empty = default = nominatim
+			'search_position' => 'topright', // regular positions: bottomleft, bottomright, topleft, topright ..
 		), $attr );
 		
 		
@@ -435,7 +503,17 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			
 			$arrMapConfig['layer'] = $this->get_tile_server( $layer );
 		}
-					
+		
+		
+		// optionally enable geocoder
+		if( !empty( $use_search ) ) {
+			$arrMapConfig[ 'use_search' ] = true;
+		}
+		
+		if( !empty( $search_position ) ) {
+			$arrMapConfig[ 'search_position' ] = $search_position;
+		}
+		
 		
 		if( !empty( $longitude ) && !empty( $latitude ) ) {
 			if( !empty( $content ) ) {
