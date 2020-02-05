@@ -78,8 +78,10 @@ jQuery( function() {
 						_search_position = 'topleft';
 						
 						if( typeof( config.search_position ) != 'undefined' ) {
-							_search_position = _search_position;
+							_search_position = config.search_position;
 						}
+						
+						//console.log( 'position:', _search_position );
 						
 						L.Control.geocoder({
 							collapsed: false,
