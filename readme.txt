@@ -7,7 +7,7 @@ Stable tag: trunk
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The most less excessive Leaflet map integration. Keeping it simple with a shortcode. Uses the latest Leaflet libary (1.0.1).
+The most less excessive Leaflet map integration. Keeping it simple with a shortcode. Uses the latest Leaflet libary (1.6).
 
 == Description ==
 
@@ -20,7 +20,8 @@ Currently implemented features:
 * Optionally position the marker somewhere else on that map
 * A few helpful filter hooks
 * On-demand loading of the respective JS files (more or less)
-* Always the latest version of Leaflet.js, with switching option to older versions (filter hook `ui_leaflet_load_leaflet_version`; available versions: 0.7.7, 1.0.1, 1.2, 1.3) 
+* Always the latest version of Leaflet.js, with switching option to older versions (filter hook `ui_leaflet_load_leaflet_version`; available versions: 0.7.7, 1.0.1, 1.2, 1.3, 1.6) 
+* Optional simple search field overlay using Leaflet Control Geocoder by Per Liedman (https://github.com/perliedman/leaflet-control-geocoder)
 
 = Work in progress =
 
