@@ -1,8 +1,11 @@
 /**
  * Leaflet handler (theoretically requires no jQuery, but we use it anyway, just because ;) :P )
  * 
- * @version 0.5
+ * @version 0.6.1
  * Changelog:
+ * v0.6.1:
+ * - bugfix for search control position
+ * 
  * v0.6:
  * - integration of geocoder / geosearch
  * 

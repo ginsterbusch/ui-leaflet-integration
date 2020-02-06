@@ -2,7 +2,7 @@
 Contributors: usability.idealist
 Tags: map, maps, Leaflet, shortcode, OpenStreetMap, OSM, opendata, open data, location, geo, geocoding, geolocation, mapnik, mapquest, mapbox, OpenLayers, mapping, coordinates, geocoding, geotagging, latitude, longitude, position, google maps, googlemaps, gmaps, google map, wms, tms, marker, layer, karte, custom marker text, leaflet map, map shortcode
 Requires at least: 4.1
-Tested up to: 5.0-nightly
+Tested up to: 5.3
 Stable tag: trunk
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -38,7 +38,7 @@ Currently implemented features:
 
 = Website =
 
-http://f2w.de/ui-leaflet-integration
+https://github.com/ginsterbusch/ui-leaflet-integration
 
 
 = Please Vote and Enjoy =
@@ -73,6 +73,8 @@ All available shortcode attributes:
 * id - The ID template for the leaflet map. Defaults to 'ui-leaflet-map-id-%s'. %s is being replaced by the current map count.
 * marker_id - Marker ID template. Defaults to 'ui-leaflet-map-id-%s'. %s is replaced with a combination of the map count and marker count.
 * height - Height of the map. Defaults to '300px'. Please do NOT forget about adding a unit. Just a plain number, eg. 300, DOES NOT work.
+* use_search - set to 'true', 'yes' or '1' to enable the optional search field control in the frontend
+* search_position - where to position the search field control; available options are: 'topleft', 'topright', 'bottomleft', 'bottomright'
 
 
 = Available tile service handles =
@@ -146,7 +148,7 @@ add_filter( 'ui_leaflet_css_url', 'my_custom_leaflet_css' );
 
 = Q. I have a question =
 A. Chances are, someone else has asked it. Either check out the support forum at WP or take a look at the official issue tracker:
-http://github.com/ginsterbusch/ui-leaflet-integration/issues
+https://github.com/ginsterbusch/ui-leaflet-integration/issues
 
 
 == Screenshots ==
@@ -156,6 +158,15 @@ http://github.com/ginsterbusch/ui-leaflet-integration/issues
 2. End result
 
 == Changelog ==
+
+= 0.8.1 =
+
+* Bugfix: Search control position 
+
+= 0.8 =
+
+* Added optional simple search field overlay using Leaflet Control Geocoder by Per Liedman (https://github.com/perliedman/leaflet-control-geocoder)
+* Updated Leaflet.js to the latest stable version (1.6)
 
 = 0.6 =
 

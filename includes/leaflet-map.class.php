@@ -2,14 +2,14 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.8
+ * @version 0.8.1
  */
  
 class _ui_LeafletIntegration extends _ui_LeafletBase {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.8';
+		$pluginVersion = '0.8.1';
 		
 	
 	public static function init() {

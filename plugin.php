@@ -4,7 +4,7 @@ Plugin Name: UI Leaflet Integration
 Plugin URI: https://github.com/ginsterbusch/ui-leaflet-integration
 Description: The most less excessive Leaflet map integration. Keeping it simple with a shortcode (and in the future, a shortcode generator interface). Uses the latest Leaflet libary (1.6). Compatible with ClassicPress 1.x.
 Tags: map, maps, Leaflet, OpenStreetMap, location, geocoding, geolocation, OpenLayers, geotagging, position, google maps, classicpress
-Version: 0.8
+Version: 0.8.1
 Author: Fabian Wolf
 Author URI: https://usability-idealist.net
 License: GNU GPL v2

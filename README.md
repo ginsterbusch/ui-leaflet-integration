@@ -8,4 +8,4 @@ License: GNU GPL v2
 
 ## Further documentation
 
-Read it all up in the [readme.txt](https://github.com/ginsterbusch/ui-leaflet-integration/blob/master/readme.txt) - or in the wiki of this repo :)
+Read it all up in the [readme.txt](https://github.com/ginsterbusch/ui-leaflet-integration/blob/master/readme.txt) - or [in the wiki](https://github.com/ginsterbusch/ui-leaflet-integration/wiki) of this repo :)
