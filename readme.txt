@@ -22,6 +22,7 @@ Currently implemented features:
 * On-demand loading of the respective JS files (more or less)
 * Always the latest version of Leaflet.js, with switching option to older versions (filter hook `ui_leaflet_load_leaflet_version`; available versions: 0.7.7, 1.0.1, 1.2, 1.3, 1.6) 
 * Optional simple search field overlay using Leaflet Control Geocoder by Per Liedman (https://github.com/perliedman/leaflet-control-geocoder)
+* Optional geolocation request (browser / mobile)
 
 = Work in progress =
 
@@ -75,6 +76,8 @@ All available shortcode attributes:
 * height - Height of the map. Defaults to '300px'. Please do NOT forget about adding a unit. Just a plain number, eg. 300, DOES NOT work.
 * use_search - set to 'true', 'yes' or '1' to enable the optional search field control in the frontend
 * search_position - where to position the search field control; available options are: 'topleft', 'topright', 'bottomleft', 'bottomright'
+* use_locate - Locate user; defaults to false. Set to 'true', '1' or 'yes' to enable it.
+* locate_marker - Optional location marker for the locate option. set to 'true', '1' or 'yes' to enable it, or enter some fancy text to be displayed in place of the defaul 'This is your current position' text.
 
 
 = Available tile service handles =
@@ -122,7 +125,7 @@ Actually, it's nearly identical to the position shown in the example :D
 There are several (programmatical) options available. First would be to load just a different local version:
 
 * Use the `ui_leaflet_load_leaflet_version` filter hook to switch between the different versions supplied in the `assets` directory - just add the version as a **string**, eg. '0.7.7' for the old stable release.
-* Available versions: 0.7.7, 1.0.1, 1.2, 1.3
+* Available versions: 0.7.7, 1.0.1, 1.2, 1.3, 1.6
 
 Second choice: Loading external libraries, as suggested by the Leaflet.js download page.
 
@@ -158,6 +161,15 @@ https://github.com/ginsterbusch/ui-leaflet-integration/issues
 2. End result
 
 == Changelog ==
+
+= 0.9.3 =
+
+* Bugfixes for the custom extension loader
+* Optionally retrieve the user location using the Location API (including fancy marker / popup window and customizable text)
+
+= 0.9 =
+
+* Add custom extensions using filter hooks (`ui_leaflet_add_extensions_js` and `ui_leaflet_add_extensions_js`)
 
 = 0.8.1 =
 

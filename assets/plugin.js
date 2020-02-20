@@ -1,8 +1,10 @@
 /**
  * Leaflet handler (theoretically requires no jQuery, but we use it anyway, just because ;) :P )
  * 
- * @version 0.6.1
+ * @version 0.6.2
  * Changelog:
+ * v0.6.2:
+ * - set zoom control position
  * v0.6.1:
  * - bugfix for search control position
  * 
@@ -55,8 +57,18 @@ jQuery( function() {
 					
 					var	map_layer = ( typeof( config.layer ) != 'undefined' ? config.layer : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' );
 					
+					// configure zoom Control
+					var _use_zoom_control = true;
+					if( typeof( config.zoom_position ) != 'undefined' ) {
+						var _use_zoom_control = false;
+					}
+					
 					// init map
-					_ui_leaflet_maps[ strMapID ] = L.map( strMapID );
+					_ui_leaflet_maps[ strMapID ] = L.map( strMapID, {
+						zoomControl: _use_zoom_control,
+					} );
+					
+					
 					
 					
 					// add tile layer (server)
@@ -65,9 +77,17 @@ jQuery( function() {
 						minZoom: 0,
 						zoom: 16,
 						subdomains: 'abc',
-						attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-							'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
+						attribution: 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+							'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
 					}).addTo( _ui_leaflet_maps[strMapID] );
+					
+					if( _use_zoom_control == false ) {
+						//console.log( 'zoom_position:', config.zoom_position );
+						
+						L.control.zoom({
+							position: config.zoom_position,
+						}).addTo( _ui_leaflet_maps[ strMapID ] );
+					}
 					
 					// focus
 					//var mymap = L.map('mapid').setView([51.505, -0.09], 13);
@@ -92,10 +112,75 @@ jQuery( function() {
 						}).addTo( _ui_leaflet_maps[ strMapID ] );
 					}
 					
+					
+					
+					_ui_leaflet_maps[ strMapID ].on( 'locationfound', function( e ) {
+						//console.info( 'location found:', e );
+					});
+					
 					_ui_leaflet_maps[ strMapID ].setView( {lng: config.longitude, lat: config.latitude}, map_zoomlevel );
 					
+					/**
+					 * Based upon @link https://developer.mapquest.com/documentation/samples/leaflet/v2.2/maps/geolocation/
+					 */
 					
-					//_ui_leaflet_maps[ strMapID ].setView( {lng: config.longitude, lat: config.latitude}, 14 );
+					if( typeof( config.use_locate ) != 'undefined' && config.use_locate != false ) {
+						console.info( 'using locate' );
+						
+						//if( typeof( config.locate_popup ) != 'undefined' ) {
+						var popup = L.popup();
+						
+						
+						
+						function geolocationErrorOccurred(geolocationSupported, popup, latLng) {
+							popup.setLatLng(latLng);
+							popup.setContent(geolocationSupported ?
+									'<strong>Error:</strong> The Geolocation service failed.' :
+									'<strong>Error:</strong> This browser doesn\'t support geolocation.');
+							//popup.openOn(geolocationMap);
+							
+							popup.openOn( _ui_leaflet_maps[ strMapID ] );
+						}
+
+						if (navigator.geolocation) {
+							
+							navigator.geolocation.getCurrentPosition(function(position) {
+								var latLng = {
+									lat: position.coords.latitude,
+									lng: position.coords.longitude
+								};
+								
+								var strPopupContent = '<strong>This</strong> is your current position.';
+
+								if( typeof( config.locate_popup ) != 'undefined' ) {
+									strPopupContent = config.locate_popup;
+								}
+
+								popup.setLatLng(latLng);
+								//popup.setContent( 'This is your current location' );
+								popup.setContent( strPopupContent );
+								//popup.openOn(geolocationMap);
+								
+								popup.openOn( _ui_leaflet_maps[ strMapID ] );
+
+								_ui_leaflet_maps[ strMapID ].setView(latLng);
+							}, function() {
+								//geolocationErrorOccurred(true, popup, geolocationMap.getCenter() );
+								geolocationErrorOccurred(true, popup, _ui_leaflet_maps[ strMapID ].getCenter() );
+								//geolocationErrorOccurred
+								
+							});
+						} else {
+							//No browser support geolocation service
+							//geolocationErrorOccurred(false, popup, geolocationMap.getCenter());
+							geolocationErrorOccurred(false, popup, _ui_leaflet_maps[ strMapID ].getCenter() );
+						}
+					
+						
+						//_ui_leaflet_maps[ strMapID ].locate({ setView: true, timeout: 5000 });
+						
+						
+					}
 					
 					
 					// init marker
@@ -122,10 +207,47 @@ jQuery( function() {
 							posMarker.lat = config.marker_position.latitude;
 						}
 						
-						var strMarkerIcon = '<i class="fa fa-map-pin fa-2x"></i>';
-						if( typeof( config.marker_fa_icon ) != 'undefined' ) {
+						
+						
+						//var strMarkerIcon = '<i class="fa fa-map-pin fa-2x"></i>';
+						/**
+						 * Change to a more fitting marker icon
+						 * @since 0.9.4
+						 */
+						
+						var strMarkerIcon = '<i class="fa fa-map-marker fa-2x"></i>';
+						
+						if( typeof( config.marker_fa_icon ) != 'undefined' && config.marker_fa_icon != '' ) {
 							var strMarkerIcon = '<i class="fa ' + config.marker_fa_icon + '"></i>';
 						}
+						
+						/**
+						 * Optionally use a FortAwesome 5 icon
+						 * @since v0.9.4
+						 */
+			
+						if( typeof( config.marker_far_icon ) != 'undefined' && config.marker_far_icon != ''  ) {
+							var strMarkerIcon = '<i class="far ' + config.marker_fa_icon + '"></i>';
+						}
+			
+						/**
+						 * Use a COMPLETE DIFFERENT icon class (eg. because you generated your own, or want to use glyphicons instead)
+						 * @since v0.9.4
+						 */
+						if( typeof( config.marker_icon_class ) != 'undefined' && config.marker_icon_class != '' ) {
+							var strMarkerIcon = '<i class="' + config.marker_icon_class + '"></i>';
+						}
+			
+			
+						/**
+						 * Use custom HTML for the marker icon instead of the default Font / Fork / Fort Awesome-based icon HTML code
+						 * @since v0.9.4
+						 */
+			
+						if( typeof( config.marker_icon_html ) != 'undefined' && config.marker_icon_html != '' ) {
+							strMarkerIcon = config.marker_icon_html;
+						}
+						
 			
 						// create div-based marker icon
 						//L.divIcon({className: 'my-div-icon'});
@@ -139,7 +261,8 @@ jQuery( function() {
 							'map_id': strMapID,
 							'marker': {
 								'position': posMarker,
-								'icon_class': 'ui-leaflet-div-icon'
+								'icon_class': 'ui-leaflet-div-icon',
+								'icon_html': strMarkerIcon,
 							},
 						} );
 						

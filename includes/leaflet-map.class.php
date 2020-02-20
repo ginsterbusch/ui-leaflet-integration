@@ -2,21 +2,25 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.8.1
+ * @version 0.9.4
  */
  
 class _ui_LeafletIntegration extends _ui_LeafletBase {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.8.1';
+		$pluginVersion = '0.9.4';
 		
 	
 	public static function init() {
-		new self();
+		new self( true );
 	}
 	
-	function __construct() {
+	function __construct( $init_plugin = false ) {
+		if( empty( $init_plugin ) ) {
+			return;
+		}
+		
 		$this->_setup();
 		
 		add_shortcode( 'ui_leaflet_map', array( $this, 'shortcode_map' ) );
@@ -110,11 +114,28 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		//new __debug( $arrDetectedShortcode, 'detected shortcodes - ' . __METHOD__ );
 
 		
+		//new __debug( $arrDetectedShortcode, 'detected shortcodes - ' . __METHOD__ );
 		if( !empty( $arrDetectedShortcode ) ) { // load assets
-		
-			add_action( 'wp_enqueue_scripts', array( $this, 'init_assets' ), 9 );
-			add_action( 'wp_enqueue_scripts', array( $this, 'load_assets' ), 15 );
+			$this->bPreloadAssets = true;
 		}
+		
+		if( defined( '_UI_LEAFLET_LOAD_ASSETS' ) ) { // enforce assets loading
+			$this->bPreloadAssets = true;
+		}
+
+		
+		if( !empty( $this->bPreloadAssets ) ) { // load assets
+		
+			add_action( 'wp_enqueue_scripts', array( $this, 'init_assets' ) );
+			add_action( 'wp_enqueue_scripts', array( $this, 'load_assets' ) );
+		}
+	}
+	
+	// explicitely initialize asset loading
+	
+	function post_load_assets() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'init_assets' ), 9 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'load_assets' ), 15 );
 	}
 	
 	function init_assets() {
@@ -129,6 +150,16 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.3.3' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.6' );
 		
+		/**
+		 * URL of the main Leaflet.js JS file
+		 * @hook ui_leaflet_js_url
+		 * 
+		 */
+		
+		/**
+		 * URL of the main Leaflet.js CSS file
+		 * @hook ui_leaflet_css_url
+		 */
 		
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
 		$leaflet_css_url = apply_filters( $this->pluginPrefix . 'css_url', trailingslashit( $this->pluginURL ) . "assets/leaflet/$leaflet_version/leaflet.css");
@@ -138,6 +169,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		//$leaflet_geocoder_css_url = apply_filters( $this->pluginPrefix . 'geocoder_css_url', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css' );
 		
 		
+		//new __debug( array( 'url' => $this->pluginURL, 'path' => $this->pluginPath ), 'plugin path settings' );
 		
 		$load_in_footer = apply_filters( $this->pluginPrefix . 'load_in_footer', true );
 		
@@ -145,12 +177,30 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		wp_register_script( $this->pluginPrefix . 'geocoder_js', $this->pluginURL . 'assets/extensions/Control.Geocoder.min.js', array( $this->pluginPrefix . 'js' ), '1.10.0', $load_in_footer );
 		
+		/**
+		 * Enqueue additional Leaflet extensions (Javascript files). Default array includes the Geocoder Control (v1.10.0) supplied with this plugin.
+		 * @hook ui_leaflet_add_extensions_js
+		 * 
+		 * @param array $extension_handles		Pre-registered handles for loading them as dependencies of the plugin JS file.
+		 */
 		
+		$extension_js_handles = apply_filters( $this->pluginPrefix . 'add_extensions_js', array( $this->pluginPrefix . 'geocoder_js' ) );
 		
-		//wp_register_script( $this->pluginPrefix . 'plugin_simple', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'js' ), $this->pluginVersion, $load_in_footer );
+		$plugin_js_deps = array( 'jquery', $this->pluginPrefix . 'js' );
 		
+		if( !empty( $extension_js_handles ) ) {
+			/**
+			 * NOTE: $plugin_js_deps need to be loaded IN THE FOOTER, else everything explodes!
+			 */
+			
+			$plugin_js_deps = wp_parse_args( $plugin_js_deps, $extension_js_handles ); 			
+		}
+		
+		//new __debug( $plugin_js_deps, 'plugin_js_deps' );
+	
 		// full
-		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', array( 'jquery', $this->pluginPrefix . 'geocoder_js' ), $this->pluginVersion, $load_in_footer );
+		
+		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', $plugin_js_deps, $this->pluginVersion, $load_in_footer );
 		
 		
 		/**
@@ -159,9 +209,30 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		 */
 		
 		
-		wp_register_style( $this->pluginPrefix . 'css_simple', $leaflet_css_url );
+		wp_register_style( $this->pluginPrefix . 'base_css', $leaflet_css_url );
 		
-		wp_register_style( $this->pluginPrefix . 'css', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css', array( $this->pluginPrefix . 'css_simple' ) );
+		wp_register_style( $this->pluginPrefix . 'geocoder_css', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css', array(), '1.10.0' );
+		
+		/**
+		 * Enqueue additional Leaflet extensions (Javascript files). Default array includes the Geocoder Control (v1.10.0) supplied with this plugin.
+		 * @hook ui_leaflet_add_extensions_css
+		 * 
+		 * @param array $extension_handles		Pre-registered handles for loading them as dependencies of the plugin JS file.
+		 */
+		
+		$extension_css_handles = apply_filters( $this->pluginPrefix . 'add_extensions_css', array( $this->pluginPrefix . 'geocoder_css' ) );
+		
+		
+		$plugin_css_deps = array( $this->pluginPrefix . 'base_css' );
+		
+		if( !empty( $extension_css_handles ) ) {
+			$plugin_css_deps = wp_parse_args( $plugin_css_deps, $extension_css_handles ); 
+		}
+		
+		//new __debug( $plugin_css_deps, 'plugin_css_deps' );
+		
+		wp_register_style( $this->pluginPrefix . 'css', $this->pluginURL . 'assets/plugin.css', $plugin_css_deps, $this->pluginVersion );
+		
 		
 		//wp_register_style( $this->pluginPrefix . 'plugin_simple', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
 		
@@ -255,10 +326,11 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 	 */
 
 	protected function _get_default_params() {
+		
 		return array(
 			'enable_map_shortcode' => false,
 			'enable_marker_shortcode' => false,
-			'tile_server' => 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+			'tile_server' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 			'map_height' => '400px', /* default height */
 		);
 	}
@@ -363,7 +435,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			case 'osmbw':
 			case 'black_white':
 			case 'bw':
-					// 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+					// 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 				$return = 'https://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png';
 				break;
 			case 'nolabels':
@@ -371,13 +443,13 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			case 'mapnik_no_labels':
 			case 'osm_no_labels':
 			case 'osm_blank':
-				$return = 'http://www.toolserver.org/tiles/osm-no-labels/{z}/{x}/{y}.png';
+				$return = 'https://www.toolserver.org/tiles/osm-no-labels/{z}/{x}/{y}.png';
 				break;
 			
 			case 'mapnik':
 			case 'mapnick':
 			default:
-				$return = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+				$return = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 				break;
 				
 			case 'skobbler':
@@ -400,7 +472,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 	 * @param string $routing			Possible routing apps: google (Google Maps)
 	 * 
 	 * 48.1372568,11.5759285 <= fischbrunnen = base coordinates
-	 * lat=48.13733&lon=11.57599 (acc. to OSM) => http://openstreetmap.de/karte.html?zoom=18&lat=48.13733&lon=11.57599&layers=000BTT
+	 * lat=48.13733&lon=11.57599 (acc. to OSM) => https://openstreetmap.de/karte.html?zoom=18&lat=48.13733&lon=11.57599&layers=000BTT
 	 */
 	
 	function shortcode_map( $attr = array(), $content = '' ) {
@@ -423,12 +495,19 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			'layer_api_key' => '',
 			'class' => 'ui-leaflet-map',
 			'marker_class' => 'ui-leaflet-marker',
+			'marker_icon_class' => '', // defaults to 'fa fa-fw fa-marker-map fa-2x' (= FontAwesome 4.x / Fork Awesome 1.x)
+			'marker_icon_fa_class' => '', // Font/ForkAwesome
+			'marker_icon_far_class' => '', // FoRtAwesome
+			'marker_icon_html' => '', // custom html for the icon, eg. an <img src=".." /> or <svg>
 			'id' => 'ui-leaflet-map-id-%s',
 			'marker_id' => 'ui-leaflet-marker-%s',
 			'height' => $this->config['map_height'],
 			'use_search' => '',
 			'search_provider' => '', // empty = default = nominatim
 			'search_position' => 'topright', // regular positions: bottomleft, bottomright, topleft, topright ..
+			'zoom_position' => '',
+			'use_locate' => '',
+			'locate_marker' => '',
 		), $attr );
 		
 		
@@ -466,6 +545,10 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 				'longitude' => $longitude,
 				'zoom' => $zoom,
 			);
+			
+			if( !empty( $zoom_position ) ) {
+				$arrMapConfig[ 'zoom_position' ] = $zoom_position;
+			}
 			
 			if( !empty( $height ) ) {
 				$arrMapConfig['height'] = $height;
@@ -514,6 +597,16 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			$arrMapConfig[ 'search_position' ] = $search_position;
 		}
 		
+		// optionally start up with (geo)location API request
+		if( !empty( $use_locate ) ) {
+			$arrMapConfig[ 'use_locate' ] = true;
+			
+			if( !empty( $locate_marker ) ) {
+				$arrMapConfig[ 'locate_popup' ] = $locate_marker;
+			}
+		}
+		
+	
 		
 		if( !empty( $longitude ) && !empty( $latitude ) ) {
 			if( !empty( $content ) ) {
@@ -543,7 +636,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 				/**
 				 * Optionally append routing link
 				 * 
-				 * - google: http://maps.google.com/maps?saddr=Seestr.+11+13349+Berlin&daddr=Seestr.+38+13349+Berlin
+				 * - google: https://maps.google.com/maps?saddr=Seestr.+11+13349+Berlin&daddr=Seestr.+38+13349+Berlin
 				 * - ors / openroute / openrouteservice: https://www.openrouteservice.org/directions?n1=48.133088&n2=11.562892&n3=15&a=48.137236,11.576181,48.131265,11.54922&b=0&c=0&k1=en-US&k2=km
 				 * => https://www.openrouteservice.org/directions?n1=48.137257&n2=11.575929&n3=15&a=48.137257,11.575929,null,null&b=0&c=0&k1=en-US&k2=km
 				 * - graphhopper / gh: https://graphhopper.com/maps/?point=Theresienwiese%2C%2080336%2C%20M%C3%BCnchen%2C%20Deutschland&point=Fischbrunnen%2C%2080331%2C%20M%C3%BCnchen%2C%20Deutschland&locale=de-DE&vehicle=car&weighting=fastest&elevation=true&use_miles=false&layer=Omniscale
@@ -561,7 +654,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 						case 'google':
 						case 'true':
 						case 'yes':
-							$strRoutingURL = 'http://maps.google.com/maps?saddr=' . $marker_latitude . ',' . $marker_longitude; // lat, long
+							$strRoutingURL = 'https://maps.google.com/maps?saddr=' . $marker_latitude . ',' . $marker_longitude; // lat, long
 							$strRoutingTitle = 'Google Maps';
 							break;
 						case 'ors':
@@ -601,6 +694,31 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 					'longitude' => $marker_longitude,
 					'latitude' => $marker_latitude,
 				);
+				
+				if( !empty( $marker_icon_class ) ) {
+					$arrMapConfig[ 'marker_icon_class' ] = $marker_icon_class;
+				}
+				
+				if( !empty( $marker_icon_fa_class ) ) {
+					$arrMapConfig[ 'marker_fa_icon' ] = $marker_icon_fa_class;
+					
+					if( strpos( $marker_icon_fa_class, 'fa-' ) === false ) {
+						$arrMapConfig[ 'marker_fa_icon' ] = 'fa-' . $arrMapConfig[ 'marker_fa_icon' ];
+					}
+				}
+				
+				if( !empty( $marker_icon_far_class ) ) { // overrides fa icon class
+					unset( $arrMapConfig[ 'marker_fa_icon' ] );
+					$arrMapConfig[ 'marker_far_icon' ] = $marker_icon_far_class;
+					
+					if( strpos( $marker_icon_far_class, 'far-' ) === false ) {
+						$arrMapConfig[ 'marker_far_icon' ] = 'far-' . $arrMapConfig[ 'marker_far_icon' ];
+					}
+				}
+				
+				if( !empty( $marker_icon_html ) ) {
+					$arrMapConfig[ 'marker_icon_html' ] = $marker_icon_html;
+				}
 					
 			}
 			
@@ -631,7 +749,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 				'keywords' => array( 
 					'google', 'yes', 'true' 
 				),
-				'url' => 'http://maps.google.com/maps?saddr=%marker_latitude%,%marker_longitude%',
+				'url' => 'https://maps.google.com/maps?saddr=%marker_latitude%,%marker_longitude%',
 				'max_zoom' => 15, /* defaults to 16 = OSM */
 			),
 			
