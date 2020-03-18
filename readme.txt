@@ -78,6 +78,10 @@ All available shortcode attributes:
 * search_position - where to position the search field control; available options are: 'topleft', 'topright', 'bottomleft', 'bottomright'
 * use_locate - Locate user; defaults to false. Set to 'true', '1' or 'yes' to enable it.
 * locate_marker - Optional location marker for the locate option. set to 'true', '1' or 'yes' to enable it, or enter some fancy text to be displayed in place of the defaul 'This is your current position' text.
+* marker_icon_class - defaults to 'fa fa-fw fa-marker-map fa-2x' (= FontAwesome 4.x / Fork Awesome 1.x).
+* marker_icon_fa_class - Font/ForkAwesome; if no 'fa-' is given, the plugin automagically adds it
+* marker_icon_far_class - Fort Awesome 5.x; dito
+* marker_icon_html - Custom html source coeefor the icon, eg. an <img src=".." /> or <svg> ..
 
 
 = Available tile service handles =
@@ -85,7 +89,7 @@ All available shortcode attributes:
 * default - uses the OSM mapnik tile server 
 * osm_bw - OSM mapnik in black and white
 * mapquest
-
+* work in progress: proper filter hook + JSON file to read in the tile service handling / tile providers automagically
 
 = Q. Where to place the marker text? =
 A. Right inside the shortcode, eg. `[ui_leaflet_map]your <strong>nifty</strong> HTML text :)[/ui_leaflet_map]
@@ -161,6 +165,12 @@ https://github.com/ginsterbusch/ui-leaflet-integration/issues
 2. End result
 
 == Changelog ==
+
+= 0.9.4 =
+* SSL-related bugfixes
+* Improved icon classes (use Fork/FontAwesome, Fort Awesome icons, your custom icon library OR replace the complete icon HTML code with your own)
+* Default marker is now the map-marker instead of the -pin
+* of corpse I forgot to update this readme-file again (not to mention the wiki) xD
 
 = 0.9.3 =
 

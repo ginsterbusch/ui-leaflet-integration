@@ -21,7 +21,7 @@
 jQuery( function() {
 	// setup variables
 	_ui_leaflet_maps = {}; // global object for further access
-		
+	_ui_leaflet_maps_position = {};
 	
 	// grab all maps
 	
@@ -31,9 +31,16 @@ jQuery( function() {
 			var strMapID = jQuery( this ).attr('id');
 			var config = jQuery( this ).data('leaflet-config');
 			
+		
+
+			
 			//console.log( 'config:', config, ' mapID: ', strMapID );
 			
 			if( typeof( strMapID ) != 'undefined' && strMapID != '' && typeof( config ) == 'object' ) {
+				
+				
+				
+				
 				// fire custom init event
 				jQuery( document ).trigger( '_ui_leaflet_map_init', {
 					'map_id': strMapID,
@@ -70,6 +77,12 @@ jQuery( function() {
 					
 					
 					
+					var strAttribution = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ';
+					
+					if( typeof( config.osm_attribution ) != 'undefined' ) {
+						strAttribution = config.osm_attribution;
+					}
+					
 					
 					// add tile layer (server)
 					L.tileLayer( map_layer, {
@@ -77,8 +90,7 @@ jQuery( function() {
 						minZoom: 0,
 						zoom: 16,
 						subdomains: 'abc',
-						attribution: 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-							'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
+						attribution: strAttribution,
 					}).addTo( _ui_leaflet_maps[strMapID] );
 					
 					if( _use_zoom_control == false ) {
@@ -125,17 +137,18 @@ jQuery( function() {
 					 */
 					
 					if( typeof( config.use_locate ) != 'undefined' && config.use_locate != false ) {
-						console.info( 'using locate' );
+						//console.info( 'using locate' );
 						
 						//if( typeof( config.locate_popup ) != 'undefined' ) {
 						var popup = L.popup();
 						
 						
 						
+						
 						function geolocationErrorOccurred(geolocationSupported, popup, latLng) {
 							popup.setLatLng(latLng);
 							popup.setContent(geolocationSupported ?
-									'<strong>Error:</strong> The Geolocation service failed.' :
+									'<strong>Error:</strong> The Geolocation service failed.' : 
 									'<strong>Error:</strong> This browser doesn\'t support geolocation.');
 							//popup.openOn(geolocationMap);
 							
@@ -149,6 +162,10 @@ jQuery( function() {
 									lat: position.coords.latitude,
 									lng: position.coords.longitude
 								};
+								
+								
+								// access in global scope on detected position
+								_ui_leaflet_maps_position[ strMapID ] = position;
 								
 								var strPopupContent = '<strong>This</strong> is your current position.';
 

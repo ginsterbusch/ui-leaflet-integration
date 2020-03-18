@@ -11,10 +11,37 @@ class _ui_LeafletBase {
 	public $pluginPath = '';
 	public $pluginURL = '';
 	
-	public $pluginVersion = '0.7';
+	public $pluginVersion = '0.9.5';
 	
 	public $debug = false;
 	public $test = false;
+
+
+	function get_plugin_prefix() {
+		$return = '';
+			
+		if( isset( $this->pluginPrefix ) ) {
+			$return = $this->pluginPrefix;
+		} elseif( defined( '_UI_LEAFLET_MAP_PREFIX' ) ) {
+			$return = _UI_LEAFLET_MAP_PREFIX;
+		}
+		
+		return $return;
+	}
+	
+	function add_plugin_prefix( $string = '', $divider = '_' ) {
+		$prefix = $this->get_plugin_prefix();
+		
+		$return = $prefix . $divider . $string;
+		
+		if( !empty( $prefix ) && !empty( $divider) && substr( $prefix, -1, 1 ) == $divider ) {
+			$return = $prefix . $string;
+		}
+		
+		return $return;
+	}
+	
+
 
 	function enable_debug() {
 		$this->debug = true;

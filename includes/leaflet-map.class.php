@@ -2,14 +2,16 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.9.4
+ * @version 0.9.5
  */
  
 class _ui_LeafletIntegration extends _ui_LeafletBase {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.9.4';
+		$pluginVersion = '0.9.5';
+		
+	protected $bPreloadAssets = false;
 		
 	
 	public static function init() {
@@ -118,6 +120,21 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		if( !empty( $arrDetectedShortcode ) ) { // load assets
 			$this->bPreloadAssets = true;
 		}
+		
+		/**
+		 * Use filter to enforce assets loading
+		 * @hook _ui_leaflet_load_assets
+		 * @since v0.9.5
+		 */
+		$load_assets_hook = apply_filters( $this->add_plugin_prefix ('load_assets' ), false );
+		
+		if( !empty( $load_assets_hook ) ) {
+			$this->bPreloadAssets = true;
+		}
+		
+		/**
+		 * Use constant to enforce assets loading
+		 */
 		
 		if( defined( '_UI_LEAFLET_LOAD_ASSETS' ) ) { // enforce assets loading
 			$this->bPreloadAssets = true;
@@ -508,6 +525,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			'zoom_position' => '',
 			'use_locate' => '',
 			'locate_marker' => '',
+			'markers' => '',
 		), $attr );
 		
 		
@@ -733,6 +751,54 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			$this->load_assets();
 		}
 	
+		
+		return $return;
+	}
+	
+	
+	/**
+	 * Extract markers from shortcode attribute
+	 * 
+	 * @since 0.9.5 (future 0.10)
+	 * @param string $data				String to parse into markers.
+	 * @param boolean $return_json		Return markers as JSON data. Defaults to TRUE.
+	 * @return mixed $markers			Either returns array OR pre-parsed marker JSON, or an empty string, if an error has occured (eg. empty input string or missing second coordinate).
+	 */
+	
+	function get_markers( $data = '', $return_json = true ) {
+		$return = '';
+		
+		if( !empty( $data ) && strpos( $data, ',' ) !== false ) {
+		
+			if( strpos( $data, ';' ) !== false ) {
+				$arrMarkerData = explode( ';', $data );
+			} else {
+				$arrMarkerData = array( $data );
+			}
+			
+			// extract marker data
+			
+			foreach( $arrMarkerData as $strRawMarker ) {
+				$x = explode( ',', trim( $strRawMarker ) );
+				
+				// lat, long, text
+				$arrMarkers[] = array(
+					'lat' => trim( $x[ 0 ] ),
+					'lng' => trim( $x[ 1 ] ),
+					'text' => ( !empty( $x2[ 2 ] ) ? trim( $x[ 2 ] ) : '' ),
+				);
+				
+			}
+		}
+		
+		if( !empty( $arrMarkers ) ) {
+			$return = $arrMarkers;
+			
+			if( !empty( $return_json ) ) { // return fully qualified marker json data
+				$return = json_encode( $arrMarkers, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT );
+			} 
+		}
+		
 		
 		return $return;
 	}
