@@ -1,0 +1,117 @@
+@font-face {
+  font-family: 'ui-leaflet-custom-icons';
+  src: url('../font/ui-leaflet-custom-icons.eot?11193773');
+  src: url('../font/ui-leaflet-custom-icons.eot?11193773#iefix') format('embedded-opentype'),
+       url('../font/ui-leaflet-custom-icons.woff2?11193773') format('woff2'),
+       url('../font/ui-leaflet-custom-icons.woff?11193773') format('woff'),
+       url('../font/ui-leaflet-custom-icons.ttf?11193773') format('truetype'),
+       url('../font/ui-leaflet-custom-icons.svg?11193773#ui-leaflet-custom-icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it. */
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'ui-leaflet-custom-icons';
+    src: url('../font/ui-leaflet-custom-icons.svg?11193773#ui-leaflet-custom-icons') format('svg');
+  }
+}
+*/
+ 
+ [class^="uil-"]:before, [class*=" uil-"]:before {
+  font-family: "ui-leaflet-custom-icons";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+ 
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Font smoothing. That was taken from TWBS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+ 
+.uil-location:before { content: '\e800'; } /* '' */
+.uil-location-1:before { content: '\e801'; } /* '' */
+.uil-pin:before { content: '\e802'; } /* '' */
+.uil-pin-1:before { content: '\e803'; } /* '' */
+.uil-login:before { content: '\e804'; } /* '' */
+.uil-cog-alt:before { content: '\e805'; } /* '' */
+.uil-cog:before { content: '\e806'; } /* '' */
+.uil-cog-circled:before { content: '\e807'; } /* '' */
+.uil-params:before { content: '\e808'; } /* '' */
+.uil-wrench:before { content: '\e809'; } /* '' */
+.uil-wrench-1:before { content: '\e80a'; } /* '' */
+.uil-wrench-2:before { content: '\e80b'; } /* '' */
+.uil-wrench-circled:before { content: '\e80c'; } /* '' */
+.uil-warning:before { content: '\e80d'; } /* '' */
+.uil-attention-circled:before { content: '\e80e'; } /* '' */
+.uil-bell:before { content: '\e80f'; } /* '' */
+.uil-info-circled:before { content: '\e810'; } /* '' */
+.uil-help-circled:before { content: '\e811'; } /* '' */
+.uil-help-circled-alt:before { content: '\e812'; } /* '' */
+.uil-check:before { content: '\e813'; } /* '' */
+.uil-ok-circled2:before { content: '\e814'; } /* '' */
+.uil-ok-circled:before { content: '\e815'; } /* '' */
+.uil-tools:before { content: '\e816'; } /* '' */
+.uil-user-add:before { content: '\e817'; } /* '' */
+.uil-th-large:before { content: '\e818'; } /* '' */
+.uil-th:before { content: '\e819'; } /* '' */
+.uil-right-outline:before { content: '\e81a'; } /* '' */
+.uil-right:before { content: '\e81b'; } /* '' */
+.uil-right-open:before { content: '\e81c'; } /* '' */
+.uil-right-open-outline:before { content: '\e81d'; } /* '' */
+.uil-left-outline:before { content: '\e81e'; } /* '' */
+.uil-left:before { content: '\e81f'; } /* '' */
+.uil-left-open:before { content: '\e820'; } /* '' */
+.uil-left-open-outline:before { content: '\e821'; } /* '' */
+.uil-down:before { content: '\e822'; } /* '' */
+.uil-download:before { content: '\e823'; } /* '' */
+.uil-down-circled2:before { content: '\e824'; } /* '' */
+.uil-down-open:before { content: '\f004'; } /* '' */
+.uil-up-open:before { content: '\f005'; } /* '' */
+.uil-menu:before { content: '\f008'; } /* '' */
+.uil-logout:before { content: '\f02d'; } /* '' */
+.uil-upload:before { content: '\f02f'; } /* '' */
+.uil-link:before { content: '\f07b'; } /* '' */
+.uil-zoom-in:before { content: '\f07e'; } /* '' */
+.uil-zoom-out:before { content: '\f07f'; } /* '' */
+.uil-up-circled:before { content: '\f0aa'; } /* '' */
+.uil-bell-alt:before { content: '\f0f3'; } /* '' */
+.uil-angle-circled-left:before { content: '\f137'; } /* '' */
+.uil-angle-circled-right:before { content: '\f138'; } /* '' */
+.uil-angle-circled-up:before { content: '\f139'; } /* '' */
+.uil-angle-circled-down:before { content: '\f13a'; } /* '' */
+.uil-right-circled2:before { content: '\f18e'; } /* '' */
+.uil-paper-plane:before { content: '\f1d8'; } /* '' */
+.uil-paper-plane-empty:before { content: '\f1d9'; } /* '' */
+.uil-sliders:before { content: '\f1de'; } /* '' */
+.uil-user-plus:before { content: '\f234'; } /* '' */
+.uil-map-pin:before { content: '\f276'; } /* '' */
+.uil-map-o:before { content: '\f278'; } /* '' */
+.uil-map:before { content: '\f279'; } /* '' */
+.uil-search:before { content: '\f50d'; } /* '' */

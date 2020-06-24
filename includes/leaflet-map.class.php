@@ -2,17 +2,16 @@
 /**
  * Insert leaflet map plus options into post (or anywhere else)
  * 
- * @version 0.9.5
+ * @version 0.9.6
  */
  
 class _ui_LeafletIntegration extends _ui_LeafletBase {
 	public $pluginPrefix = 'ui_leaflet_',
 		$pluginPath = '',
 		$pluginURL = '',
-		$pluginVersion = '0.9.5';
+		$pluginVersion = '0.9.6';
 		
 	protected $bPreloadAssets = false;
-		
 	
 	public static function init() {
 		new self( true );
@@ -160,7 +159,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		 * Change the version number (string!) to load a different version of the leaflet map library, eg. for backward compatiblity.
 		 * @hook ui_leaflet_load_leaflet_version
 		 */
-		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '0.7.7' );
+		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '0.7.7' ); // legacy version
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.0.1' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.2' );
 		$leaflet_version = apply_filters( $this->pluginPrefix . 'load_leaflet_version', '1.3' );
@@ -181,11 +180,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		$leaflet_js_url = apply_filters( $this->pluginPrefix . 'js_url', trailingslashit( $this->pluginURL ). "assets/leaflet/$leaflet_version/leaflet.js");
 		$leaflet_css_url = apply_filters( $this->pluginPrefix . 'css_url', trailingslashit( $this->pluginURL ) . "assets/leaflet/$leaflet_version/leaflet.css");
 		
-		//$leaflet_geocoder_version = '1.10.0';
-		//$leaflet_geocoder_js_url = apply_filters( $this->pluginPrefix . 'geocoder_js_url', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.js' );
-		//$leaflet_geocoder_css_url = apply_filters( $this->pluginPrefix . 'geocoder_css_url', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css' );
-		
-		
+	
 		//new __debug( array( 'url' => $this->pluginURL, 'path' => $this->pluginPath ), 'plugin path settings' );
 		
 		$load_in_footer = apply_filters( $this->pluginPrefix . 'load_in_footer', true );
@@ -213,11 +208,37 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			$plugin_js_deps = wp_parse_args( $plugin_js_deps, $extension_js_handles ); 			
 		}
 		
+		/**
+		 * Add additional options and settings to be available for the extensions using this filter. By default, uses additional options for the Geocoder Control (primarly for string translation)
+		 * @hook ui_leaflet_add_extension_options
+		 * 
+		 * @param array $extension_options
+		 * 
+		 * 
+		 */
+		
+		$extension_options = apply_filters( $this->pluginPrefix . 'add_extension_options', array( 
+			$this->pluginPrefix . 'geocoder_js' => array(
+				'errorMessage' => __('Nothing found.', 'ui-leaflet-integration' ),
+				'placeholder' => __('Search ..', 'ui-leaflet-integration' ),
+				'iconLabel' => __('Initiate a new search', 'ui-leaflet-integration' ),
+			),
+			/*
+			'zoom_control' => array(
+				
+			),*/
+		) );
+		
 		//new __debug( $plugin_js_deps, 'plugin_js_deps' );
 	
 		// full
 		
 		wp_register_script( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ). 'assets/plugin.js', $plugin_js_deps, $this->pluginVersion, $load_in_footer );
+		
+		// add additional options using wp_localize_script
+		if( !empty( $extension_options ) ) {
+			wp_localize_script( $this->pluginPrefix . 'plugin', $this->pluginPrefix . 'extension_options', $extension_options );
+		}
 		
 		
 		/**
@@ -230,6 +251,10 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		wp_register_style( $this->pluginPrefix . 'geocoder_css', trailingslashit( $this->pluginURL ) . 'assets/extensions/Control.Geocoder.css', array(), '1.10.0' );
 		
+		//wp_register_style( $this->pluginPrefix . 'fork-awesome', trailingslashit ( $this->pluginURL ) . 'assets/fork-awesome/css/fork-awesome.min.css', array(), '1.1.7' );
+		
+		wp_register_style( $this->pluginPrefix . 'custom-icons', trailingslashit( $this->pluginURL ) . 'assets/fontello/css/ui-leaflet-custom-icons.css', array(), $this->pluginVersion );
+		
 		/**
 		 * Enqueue additional Leaflet extensions (Javascript files). Default array includes the Geocoder Control (v1.10.0) supplied with this plugin.
 		 * @hook ui_leaflet_add_extensions_css
@@ -238,6 +263,15 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		 */
 		
 		$extension_css_handles = apply_filters( $this->pluginPrefix . 'add_extensions_css', array( $this->pluginPrefix . 'geocoder_css' ) );
+		
+		
+		$load_custom_icons = apply_filters( $this->pluginPrefix . 'load_icons', false );
+		
+		
+		 
+		if( !empty( $load_custom_icons ) && !in_array( $this->pluginPrefix . 'custom-icons', $extension_css_handles, true ) ) {
+			$extension_css_handles[] = $this->pluginPrefix . 'custom-icons';
+		}
 		
 		
 		$plugin_css_deps = array( $this->pluginPrefix . 'base_css' );
@@ -250,10 +284,6 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		wp_register_style( $this->pluginPrefix . 'css', $this->pluginURL . 'assets/plugin.css', $plugin_css_deps, $this->pluginVersion );
 		
-		
-		//wp_register_style( $this->pluginPrefix . 'plugin_simple', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'css' ), $this->pluginVersion, false );
-		
-		//wp_register_style( $this->pluginPrefix . 'plugin', trailingslashit( $this->pluginURL ) . 'assets/plugin.css', array( $this->pluginPrefix . 'geocoder_css' ), $this->pluginVersion, false );
 		
 		// dont load CSS in footer
 		
@@ -311,6 +341,8 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		// for the future
 		//$arrOptions = get_option( $this->pluginPrefix . 'settings', array() );
 		
+		
+		
 		if( !empty( $arrOptions ) && is_array( $arrOptions ) ) {
 			$this->config = wp_parse_args( $this->_get_default_params(), $arrOptions );
 		} else {
@@ -330,6 +362,8 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			$this->pluginPath = _UI_LEAFLET_MAP_PATH;
 		}
 		
+		
+		
 		//add_action('wp_footer', array( $this, 'reset_queue' ), 9999 );
 		
 	}
@@ -344,12 +378,29 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 
 	protected function _get_default_params() {
 		
-		return array(
+		$return = array(
 			'enable_map_shortcode' => false,
 			'enable_marker_shortcode' => false,
 			'tile_server' => 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 			'map_height' => '400px', /* default height */
+			'mapquest_key' => '',
 		);
+		
+		/**
+		 * @since v0.9.6
+		 * 
+		 * NOTE Not very useful for the tile server, because MQ apparently doesnt offer direct access to its tile server anymore (only with the help of Leaflet plugins), but its certainly a big help for any kind of geocoder :)
+		 */
+		
+		$strMapQuestKey = '';
+		
+		if( defined( '_UI_LEAFLET_MAPQUEST_KEY' ) ) {
+			$strMapQuestKey = _UI_LEAFLET_MAPQUEST_KEY;
+		}
+		
+		$return[ 'mapquest_key' ] = apply_filters( $this->add_plugin_prefix( 'get_mapquest_key' ), $strMapQuestKey );
+		
+		return $return;
 	}
 	
 
@@ -438,8 +489,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 		
 		/**
 		 * List from @link https://josm.openstreetmap.de/wiki/Maps
-		 */
-		
+		 */		
 		switch( $handle ) {
 			case 'default':
 			case 'standard':
@@ -462,13 +512,13 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			case 'osm_blank':
 				$return = 'https://www.toolserver.org/tiles/osm-no-labels/{z}/{x}/{y}.png';
 				break;
-			
 			case 'mapnik':
 			case 'mapnick':
 			default:
 				$return = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 				break;
 				
+		
 			case 'skobbler':
 				$return = '';
 				break;
@@ -487,6 +537,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 	 * @param string $position			Format: "$longitude, $latitude". Alternative to using the longitude and latitude parameters.
 	 * @param int $zoom					Zoom level. Optional.
 	 * @param string $routing			Possible routing apps: google (Google Maps)
+	 * @param bool|string $autoload_fa	Autoload Fork Awesome CSS. Enable by adding '1' or 'true' as attribute value. Defaults to false. In later stages, one may also use a string to load specific variations of Font Awesome ('fork-awesome' = Fork Awesome 1.x, 'font-awesome' = Font Awesome 4.x, 'font-awesome-pro' = Font Awesome (Pro) 5.x).
 	 * 
 	 * 48.1372568,11.5759285 <= fischbrunnen = base coordinates
 	 * lat=48.13733&lon=11.57599 (acc. to OSM) => https://openstreetmap.de/karte.html?zoom=18&lat=48.13733&lon=11.57599&layers=000BTT
@@ -526,6 +577,7 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			'use_locate' => '',
 			'locate_marker' => '',
 			'markers' => '',
+			'load_icons' => true,
 		), $attr );
 		
 		
@@ -624,6 +676,9 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 			}
 		}
 		
+		if( !empty( $load_icons ) ) {
+			add_filter( $this->pluginPrefix . 'load_icons', '__return_true' );
+		}
 	
 		
 		if( !empty( $longitude ) && !empty( $latitude ) ) {
@@ -667,6 +722,22 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 				if( !empty( $routing ) || !empty( $route_service)  ) {
 					$strRoutingService = ( !empty( $routing ) ? $routing : $route_service );
 					
+					/**
+					 * Filter: Custom routing service
+					 * 
+					 * @hook _ui_leaflet_custom_routing_service
+					 * @param array $parameters
+					 * @param string $slug		Slug / ID to select the service via the routing / route_service shortcode attribute.
+					 * @param string $title		Title of the service to display inside the popup.
+					 * @param string $url		
+					 * @param string $text		Custom text (instead of the default "Open in %s"). Supports sprintf parameters.
+					 * 
+					 * @since 0.9.6
+					 */
+					
+					$arrCustomRoutingService = apply_filters( $this->add_plugin_prefix( 'custom_routing_service' ), array() );
+					
+					
 					
 					switch( $strRoutingService ) {
 						case 'google':
@@ -691,6 +762,15 @@ class _ui_LeafletIntegration extends _ui_LeafletBase {
 						case 'graphhoper':
 							break;
 					}
+					
+					/**
+					 * @since 0.9.6
+					 */
+					
+					if( !empty( $arrCustomRoutingService ) ) {
+						
+					}
+					
 					
 					$strRoutingText = sprintf( __('Open in %s', '_ui-leaflet-integration'), $strRoutingTitle );
 					if( !empty( $routing_text ) || !empty( $route_service_text ) ) {

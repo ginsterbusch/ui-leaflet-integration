@@ -1,0 +1,15 @@
+/**
+ * Custom icon set for UI Leaflet Integration
+ * @since v0.9.5
+ */
+
+@import "../css/ui-leaflet-custom-icons";
+
+// variables
+$fa-css-prefix: "uil";
+
+
+// add sizing options, similar to font / fork awesome
+
+@import "larger";
+@import "fixed-width";

@@ -1,10 +1,22 @@
 /**
  * Leaflet handler (theoretically requires no jQuery, but we use it anyway, just because ;) :P )
  * 
- * @version 0.6.2
+ * @version 0.7
+ * 
  * Changelog:
+ * 
+ * v0.7:
+ * - added custom options for zoom control and geocoder via global script object (ui_leaflet_extension_options)
+ * 
+ * v0.6.4:
+ * - added customizable location detection error messages
+ * 
+ * v0.6.3:
+ * - changed default marker HTML to use our own custom font icon set
+ * 
  * v0.6.2:
  * - set zoom control position
+ * 
  * v0.6.1:
  * - bugfix for search control position
  * 
@@ -14,6 +26,7 @@
  * v0.5:
  * - enhanced custom events with useful information
  * - event data always include the map ID
+ * 
  * v0.4:
  * - added custom events
  */
@@ -96,9 +109,36 @@ jQuery( function() {
 					if( _use_zoom_control == false ) {
 						//console.log( 'zoom_position:', config.zoom_position );
 						
+						var _zoom_control_options = {
+							position: config.zoom_position,
+						};
+						/**
+						 * Add options for the custom zoom control via global JS object
+						 * 
+						 * @since 0.9.6
+						 */
+						
+						if( typeof( ui_leaflet_extension_options ) != 'undefined' && typeof( ui_leaflet_extension_options.zoom_control ) != 'undefined' ) {
+							var _default_zoom_control_options = _zoom_control_options;
+							
+							_zoom_control_options = Object.assign( _zoom_control_options, ui_leaflet_extension_options.zoom_control );
+							
+							/*
+							_zoom_control_options = ui_leaflet_extension_options.zoom_control;
+							
+							if( typeof( _zoom_control_options.position ) == 'undefined' ) {
+								_zoom_control_options.position = config.zoom_position;
+							}*/
+						}
+						console.log( 'current zoom control options:', _zoom_control_options );
+						
+						L.control.zoom( _zoom_control_options ).addTo( _ui_leaflet_maps[ strMapID ] );
+						
+						/*
 						L.control.zoom({
 							position: config.zoom_position,
 						}).addTo( _ui_leaflet_maps[ strMapID ] );
+						*/
 					}
 					
 					// focus
@@ -110,7 +150,7 @@ jQuery( function() {
 					
 					if( typeof( config.use_search ) != 'undefined' && typeof( L.Control.geocoder ) != 'undefined' ) { // enabled and geocoder lib loaded
 						
-						_search_position = 'topleft';
+						_search_position = 'topright';
 						
 						if( typeof( config.search_position ) != 'undefined' ) {
 							_search_position = config.search_position;
@@ -118,10 +158,29 @@ jQuery( function() {
 						
 						//console.log( 'position:', _search_position );
 						
+						/**
+						 * Custom geocoder options
+						 * @since v0.9.6
+						 */
+						
+						_ui_leaflet_geocoder_options = {
+							collapsed: false,
+							position: _search_position,
+						};
+						
+						if( typeof( ui_leaflet_extension_options.ui_leaflet_geocoder_js ) != 'undefined' ) {
+							_ui_leaflet_geocoder_options = Object.assign( _ui_leaflet_geocoder_options, ui_leaflet_extension_options.ui_leaflet_geocoder_js );
+						}
+						
+						
+						L.Control.geocoder( _ui_leaflet_geocoder_options ).addTo( _ui_leaflet_maps[ strMapID ] );
+						
+						/*
 						L.Control.geocoder({
 							collapsed: false,
 							position: _search_position,
 						}).addTo( _ui_leaflet_maps[ strMapID ] );
+						*/
 					}
 					
 					
@@ -142,14 +201,24 @@ jQuery( function() {
 						//if( typeof( config.locate_popup ) != 'undefined' ) {
 						var popup = L.popup();
 						
+						var strLocDecErrorMsg = '<strong>Error:</strong> The Geolocation service failed.'; // supported, but failed
+						var strLocDecUnsupportedMsg = '<strong>Error:</strong> This browser doesn\'t support geolocation.'; // not supported by device
 						
+						if( typeof( config.msg_locate_error ) != 'undefined' ) {
+							strLocDecErrorMsg = config.msg_locate_error;
+						}
 						
+						if( typeof( config.msg_locate_unsupported ) != 'undefined' ) {
+							strLocDecUnsupportedMsg = config.msg_locate_unsupported;
+						}
+					
 						
 						function geolocationErrorOccurred(geolocationSupported, popup, latLng) {
 							popup.setLatLng(latLng);
 							popup.setContent(geolocationSupported ?
-									'<strong>Error:</strong> The Geolocation service failed.' : 
-									'<strong>Error:</strong> This browser doesn\'t support geolocation.');
+								strLocDecErrorMsg : 
+								strLocDecUnsupportedMsg
+							);
 							//popup.openOn(geolocationMap);
 							
 							popup.openOn( _ui_leaflet_maps[ strMapID ] );
@@ -232,7 +301,8 @@ jQuery( function() {
 						 * @since 0.9.4
 						 */
 						
-						var strMarkerIcon = '<i class="fa fa-map-marker fa-2x"></i>';
+						//var strMarkerIcon = '<i class="fa fa-map-marker fa-2x"></i>';
+						var strMarkerIcon = '<i class="uil-location uil-2x"></i>';
 						
 						if( typeof( config.marker_fa_icon ) != 'undefined' && config.marker_fa_icon != '' ) {
 							var strMarkerIcon = '<i class="fa ' + config.marker_fa_icon + '"></i>';
@@ -244,7 +314,7 @@ jQuery( function() {
 						 */
 			
 						if( typeof( config.marker_far_icon ) != 'undefined' && config.marker_far_icon != ''  ) {
-							var strMarkerIcon = '<i class="far ' + config.marker_fa_icon + '"></i>';
+							var strMarkerIcon = '<i class="far fab ' + config.marker_fa_icon + '"></i>';
 						}
 			
 						/**

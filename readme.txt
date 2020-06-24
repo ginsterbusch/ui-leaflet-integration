@@ -166,6 +166,18 @@ https://github.com/ginsterbusch/ui-leaflet-integration/issues
 
 == Changelog ==
 
+= 0.9.6 =
+
+* Tweak: Added custom extension options via filter hook (`ui_leaflet_add_extension_options`), exposed in JS as global object `ui_leaflet_extension_options`
+
+= 0.9.5 =
+
+* Tweak: Added marker extraction routine for the main shortcode (in preparation for future versions)
+* Tweak: Use filter hook to enforce assets loading (`_ui_leaflet_load_assets`)
+* Added experimental custom icons (SVG / CSS)
+* Several bugfixes
+
+
 = 0.9.4 =
 * SSL-related bugfixes
 * Improved icon classes (use Fork/FontAwesome, Fort Awesome icons, your custom icon library OR replace the complete icon HTML code with your own)
